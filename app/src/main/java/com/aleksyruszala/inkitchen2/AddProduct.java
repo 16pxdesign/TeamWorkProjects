@@ -129,7 +129,7 @@ public class AddProduct extends AppCompatActivity {
                      product.put("barcode",barcode);
                      product.put("name",productName);
                      product.put("price",price);
-                     product.put("category",categorySelected);
+                     product.put("category",null);
                      mDatabaseProductName.setValue(product);
                      Toast.makeText(getApplicationContext(),"Product added." , Toast.LENGTH_SHORT).show();
 

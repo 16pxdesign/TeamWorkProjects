@@ -25,7 +25,7 @@ public class AddCategory extends AppCompatActivity {
     ArrayAdapter<String> spinnerAdapter;
     ArrayList<String> arraySpinner;
     Spinner spinner;
-    private String currentUserID, currentCategoryParent;
+    private String currentUserID, currentIdCategoryParent, currentNameCategoryParent;
 
     DatabaseReference mDatabaseCategory;
 
@@ -34,13 +34,16 @@ public class AddCategory extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_category);
 
+        currentUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabaseCategory = FirebaseDatabase.getInstance().getReference().child("Users").child("Categories").child(currentUserID);
+
         Bundle bundle = getIntent().getExtras();
         if(bundle!=null){
             if(bundle.getString("currentParent")!=null){
-                currentCategoryParent = bundle.getString("currentParent");
+                currentIdCategoryParent = bundle.getString("currentParent");
             }
         }else{
-            currentCategoryParent = "No parent";
+            currentIdCategoryParent = "No parent";
         }
 
 
@@ -55,8 +58,7 @@ public class AddCategory extends AppCompatActivity {
         catNameEditText = (EditText) findViewById(R.id.catNameEditText);
 
 
-        currentUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabaseCategory = FirebaseDatabase.getInstance().getReference().child("Users").child("Categories").child(currentUserID);
+
         loadList();
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,8 +94,8 @@ public class AddCategory extends AppCompatActivity {
                         arraySpinner.add(categoryName);
                         spinnerAdapter.notifyDataSetChanged();
 
-                        if(categoryName.equalsIgnoreCase(currentCategoryParent)){
-                            int i = arraySpinner.indexOf(currentCategoryParent);
+                        if(categoryName.equalsIgnoreCase(currentIdCategoryParent)){
+                            int i = arraySpinner.indexOf(currentIdCategoryParent);
                             spinner.setSelection(i);
                         }
                     }
