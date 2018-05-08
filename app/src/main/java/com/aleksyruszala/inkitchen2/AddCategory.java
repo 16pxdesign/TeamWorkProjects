@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.aleksyruszala.inkitchen2.CustomObjects.Category;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -22,8 +23,8 @@ import java.util.Map;
 
 public class AddCategory extends AppCompatActivity {
     EditText catNameEditText;
-    ArrayAdapter<String> spinnerAdapter;
-    ArrayList<String> arraySpinner;
+    ArrayAdapter<Category> spinnerAdapter;
+    ArrayList<Category> arraySpinner;
     Spinner spinner;
     private String currentUserID, currentIdCategoryParent, currentNameCategoryParent;
 
@@ -51,8 +52,8 @@ public class AddCategory extends AppCompatActivity {
         Button cancelButton = (Button) findViewById(R.id.okButton);
         spinner = (Spinner) findViewById(R.id.spinner);
         arraySpinner = new ArrayList<>();
-        arraySpinner.add("No parent");
-        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arraySpinner);
+        arraySpinner.add(new Category(null, "No Parent"));
+        spinnerAdapter = new ArrayAdapter<Category>(this, android.R.layout.simple_spinner_item, arraySpinner);
         spinner.setAdapter(spinnerAdapter);
 
         catNameEditText = (EditText) findViewById(R.id.catNameEditText);
@@ -64,12 +65,13 @@ public class AddCategory extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String categoryName = catNameEditText.getText().toString();
-                String prentName = spinner.getSelectedItem().toString();
+                long selectedItemId = spinner.getSelectedItemId();
+                Category categoryItem = arraySpinner.get((int) selectedItemId);
                 if(!categoryName.isEmpty()){
                     DatabaseReference mDatabaseCategoryName = mDatabaseCategory.push();
                     Map category = new HashMap();
                     category.put("name",categoryName);
-                    category.put("parent",prentName);
+                    category.put("parent",categoryItem.getId());
                     mDatabaseCategoryName.setValue(category);
                     Toast.makeText(getApplicationContext(),"Category added.", Toast.LENGTH_SHORT).show();
                 }
@@ -91,7 +93,7 @@ public class AddCategory extends AppCompatActivity {
                     String categoryName = null;
                     if(dataSnapshot.child("name").getValue()!=null){
                         categoryName = dataSnapshot.child("name").getValue().toString();
-                        arraySpinner.add(categoryName);
+                        arraySpinner.add(new Category(dataSnapshot.getKey(),categoryName));
                         spinnerAdapter.notifyDataSetChanged();
 
                         if(categoryName.equalsIgnoreCase(currentIdCategoryParent)){

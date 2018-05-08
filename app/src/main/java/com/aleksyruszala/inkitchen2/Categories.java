@@ -49,6 +49,7 @@ public class Categories extends AppCompatActivity {
         if (bundle != null) {
             if (bundle.getString("parentSelected") != null) {
                 currentCategoryParent = bundle.getString("parentSelected");
+                Log.d("JA2-bundle", currentCategoryParent);
                 DatabaseReference ref = mDatabaseCategory.child(currentCategoryParent);
 
                 ref.addValueEventListener(new ValueEventListener() {
@@ -97,6 +98,7 @@ public class Categories extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 TextView listValue = (TextView) view;
                 String categoryIdSelected = categoriesList.get(i).getId();
+
                 Intent intent = new Intent(Categories.this, Categories.class);
                 intent.putExtra("parentSelected", categoryIdSelected);
                 startActivity(intent);
@@ -111,21 +113,29 @@ public class Categories extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.exists()) {
                     Product product = null;
-                    /*String categoryProduct;
-                    if(dataSnapshot.child("category").getValue()==null || dataSnapshot.child("category").getValue().toString().isEmpty()  ){
-                        categoryProduct = "No parent";
-                    }else{
-                        categoryProduct = dataSnapshot.child("category").getValue().toString();
-                    }*/
-                    Log.d("JA", "Istnieje");
+
+
                     if (dataSnapshot.child("category").getValue() == currentCategoryParent) {
-                        Log.d("JA", "Istnieje2");
+
                         String name = dataSnapshot.child("name").getValue().toString();
                         String barcode = dataSnapshot.child("barcode").getValue().toString();
                         String price = dataSnapshot.child("price").getValue().toString();
                         productList.add(new Product(barcode, name, price));
                         gridAdapter.notifyDataSetChanged();
+
+                    }else if( dataSnapshot.child("category").getValue() != null){
+                        if(dataSnapshot.child("category").getValue().toString().equals(currentCategoryParent)){
+                            String name = dataSnapshot.child("name").getValue().toString();
+                            String barcode = dataSnapshot.child("barcode").getValue().toString();
+                            String price = dataSnapshot.child("price").getValue().toString();
+                            productList.add(new Product(barcode, name, price));
+                            gridAdapter.notifyDataSetChanged();
+                        }
                     }
+
+
+
+
                 }
             }
 
@@ -158,12 +168,23 @@ public class Categories extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.exists()) {
                     String categoryName = null;
+
                     if (dataSnapshot.child("parent").getValue() == currentCategoryParent) {
+
 
                         categoryName = dataSnapshot.child("name").getValue().toString();
                         categoriesList.add(new Category(dataSnapshot.getKey(), categoryName));
                         adapter.notifyDataSetChanged();
+                    }else if( dataSnapshot.child("parent").getValue() != null){
+                        if(dataSnapshot.child("parent").getValue().toString().equals(currentCategoryParent)){
+                            categoryName = dataSnapshot.child("name").getValue().toString();
+                            categoriesList.add(new Category(dataSnapshot.getKey(), categoryName));
+                            adapter.notifyDataSetChanged();
+                        }
                     }
+
+
+
                 }
             }
 

@@ -14,6 +14,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aleksyruszala.inkitchen2.CustomObjects.Category;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -35,8 +36,9 @@ public class AddProduct extends AppCompatActivity {
     private DatabaseReference mDatabaseProduct,mDatabaseCategory;
     private Switch keepOnSwitch;
     private Boolean keepOn = false;
-    ArrayAdapter<String> categoryAdapter, unitAdapter;
-    ArrayList<String> categoryList = new ArrayList<String>();
+    ArrayAdapter<String> unitAdapter;
+    ArrayAdapter<Category> categoryAdapter;
+    ArrayList<Category> categoryList = new ArrayList<Category>();
     ArrayList<String> unitList = new ArrayList<String>();
     TextView unitEndTextView;
 
@@ -62,8 +64,8 @@ public class AddProduct extends AppCompatActivity {
         mDatabaseProduct = FirebaseDatabase.getInstance().getReference().child("Users").child("Products").child(currentUserID);
         mDatabaseCategory = FirebaseDatabase.getInstance().getReference().child("Users").child("Categories").child(currentUserID);
 
-        categoryList.add("");
-        categoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categoryList);
+        categoryList.add(new Category(null, "No category"));
+        categoryAdapter = new ArrayAdapter<Category>(this, android.R.layout.simple_spinner_item, categoryList);
         categorySpinner.setAdapter(categoryAdapter);
         loadCategories();
 
@@ -109,13 +111,9 @@ public class AddProduct extends AppCompatActivity {
                  if(!priceString.isEmpty()) price = Double.parseDouble(priceString);
                  String amountString = amountEditText.getText().toString();
                  if(!amountString.isEmpty()) amount = Double.parseDouble(priceString);
-                 String categorySelected = null;
-                 if(categorySpinner.getSelectedItem()==null){
-                     categorySelected = null;
-                 }else {
-                     categorySelected = categorySpinner.getSelectedItem().toString();
-                 }
 
+                 long selectedItemId = categorySpinner.getSelectedItemId();
+                 Category category = categoryList.get((int) selectedItemId);
 
 
                  if(!barcode.isEmpty() && !productName.isEmpty() && !priceString.isEmpty()){
@@ -129,7 +127,7 @@ public class AddProduct extends AppCompatActivity {
                      product.put("barcode",barcode);
                      product.put("name",productName);
                      product.put("price",price);
-                     product.put("category",null);
+                     product.put("category",category.getId());
                      mDatabaseProductName.setValue(product);
                      Toast.makeText(getApplicationContext(),"Product added." , Toast.LENGTH_SHORT).show();
 
@@ -158,7 +156,7 @@ public class AddProduct extends AppCompatActivity {
                         String categoryName = null;
                         if(dataSnapshot.child("name").getValue()!=null){
                             categoryName = dataSnapshot.child("name").getValue().toString();
-                            categoryList.add(categoryName);
+                            categoryList.add(new Category(dataSnapshot.getKey(),categoryName));
                             categoryAdapter.notifyDataSetChanged();
                         }
                     }
