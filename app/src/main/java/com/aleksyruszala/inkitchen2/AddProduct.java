@@ -1,5 +1,7 @@
 package com.aleksyruszala.inkitchen2;
 
+import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aleksyruszala.inkitchen2.CustomObjects.Category;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -32,7 +36,7 @@ public class AddProduct extends AppCompatActivity {
     private Spinner categorySpinner, unitSpinner;
     private String currentUserID, barcode, productName, units, category;
     private double price, amount;
-    private Button okButton,cancelButton;
+    private Button okButton,cancelButton,scanButton;
     private DatabaseReference mDatabaseProduct,mDatabaseCategory;
     private Switch keepOnSwitch;
     private Boolean keepOn = false;
@@ -55,6 +59,7 @@ public class AddProduct extends AppCompatActivity {
         categorySpinner =(Spinner) findViewById(R.id.categorySpinner);
         okButton = (Button) findViewById(R.id.okButton);
         cancelButton = (Button) findViewById(R.id.cancelButton);
+        scanButton = (Button) findViewById(R.id.scanButton);
         cancelButton = (Button) findViewById(R.id.cancelButton);
         keepOnSwitch = (Switch) findViewById(R.id.keepOn);
         unitEndTextView = (TextView) findViewById(R.id.unitEndTextView);
@@ -147,6 +152,21 @@ public class AddProduct extends AppCompatActivity {
          });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 0 ){
+            if(resultCode == CommonStatusCodes.SUCCESS){
+                if(data!=null){
+                    Barcode barcode = data.getParcelableExtra("barcode");
+                    barcodeEditText.setText(barcode.displayValue);
+                }else{
+                    barcodeEditText.setText("NoNumber");
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void loadCategories() {
 
             mDatabaseCategory.addChildEventListener(new ChildEventListener() {
@@ -182,6 +202,15 @@ public class AddProduct extends AppCompatActivity {
 
                 }
             });
+
+            scanButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(AddProduct.this, BarcodeScanner.class);
+                    startActivityForResult(intent,0);
+                }
+            });
+
 
     }
 }
